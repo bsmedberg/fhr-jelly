@@ -71,9 +71,8 @@
                         <div class="statsBoxSection-content">
                             <ul id="vital_stats">
                                 <li>{{ _("version") }}<span class="statsBoxSection-value"></span></li>
-                                <li>{{ _("time open") }}<span class="statsBoxSection-value"></span></li>
-                                <li>{{ _("last crash") }}<span class="statsBoxSection-value"></span></li>
-                                <li>{{ _("bookmarks") }}<span class="statsBoxSection-value"></span></li>
+                                <li>{{ _("update channel") }}<span class="statsBoxSection-value"></span></li>
+                                <li>{{ _("updates") }}<span class="statsBoxSection-value"></span><li>
                             </ul>
                         </div>
                     </div>
@@ -84,6 +83,7 @@
                         </div>
                         <div class="statsBoxSection-content">
                             <ul id="current_month">
+                                <li>{{ _("total sessions") }}<span class="statsBoxSection-value"></span></li>
                                 <li>{{ _("time open") }}<span class="statsBoxSection-value"></span></li>
                                 <li>{{ _("application crashes") }}<span class="statsBoxSection-value"></span></li>
                                 <li>{{ _("plugin crashes") }}<span class="statsBoxSection-value"></span></li>
@@ -93,28 +93,17 @@
 
                     <div class="statsBoxSection">
                         <div class="statsBoxSection-header">
-                            <img class="icon" src="img/icon-addons.png" height="16" width="16">{{ _('Add-ons') }}<span class="statsBoxSection-value"><!--{{ _('View List') }}--></span>
+                            <img class="icon" src="img/icon-addons.png" height="16" width="16">{{ _('Active Add-ons') }}<span class="statsBoxSection-value"><!--{{ _('View List') }}--></span>
                         </div>
                         <div class="statsBoxSection-content">
                             <ul id="addons">
-                                <li>{{ _("enabled") }}<span class="statsBoxSection-value"></span></li>
-                                <li>{{ _("disabled") }}<span class="statsBoxSection-value"></span></li>
+                                <li>{{ _("Extensions") }}<span class="statsBoxSection-value"></span></li>
+                                <li>{{ _("Plugins") }}<span class="statsBoxSection-value"></span></li>
+                                <li>{{ _("Plugins (Click-to-Activate)") }}<span class="statsBoxSection-value"></span></li>
                             </ul>
                         </div>
                     </div>
 
-                    <div class="statsBoxSection">
-                        <div class="statsBoxSection-header">
-                            <img class="icon" src="img/icon-plugins.png" height="16" width="16">{{ _('Plugins') }}<span class="statsBoxSection-value"><!--{{ _('View List') }}--></span>
-                        </div>
-                        <div class="statsBoxSection-content">
-                            <ul id="plugins">
-                                <li>{{ _("always activate") }}<span class="statsBoxSection-value"></span></li>
-                                <li>{{ _("ask to activate") }}<span class="statsBoxSection-value"></span></li>
-                                <li>{{ _("never activate") }}<span class="statsBoxSection-value"></span></li>
-                            </ul>
-                        </div>
-                    </div>
                 </div>
             </div>
             <div id="health" class="mainContent">
@@ -163,14 +152,6 @@
 
                 <figure class="graphbox">
                     <h2>{{ _('Startup Time by Day') }}</h2>
-
-                    <div id="graph_selector" class="selector">
-                        <h4>{{ _('Graph:') }}</h4>
-                        <ul>
-                            <li><a href="#median" class="active" id="graph_median">{{ _('Average') }}</a></li>
-                            <li><a href="#all" id="graph_all">{{ _('All') }}</a></li>
-                        </ul>
-                    </div>
 
                     <div class="graph"></div>
                     <div class="yaxis-label">{{ _('Time (in seconds)') }}</div>
@@ -545,7 +526,7 @@
             }
         });
         </script>
-        <script type="text/javascript" src="js/data.js"></script>
-        <script type="text/javascript" src="js/fhr.js"></script>
+        <script type="text/javascript;version=1.8" src="js/fhr.js"></script>
+        <script type="text/javascript;version=1.8" src="js/data.js"></script>
     </body>
 </html>
