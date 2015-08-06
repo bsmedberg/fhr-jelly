@@ -76,7 +76,7 @@ $(function() {
 
 // Paints the startup times onto the main graph.
 // @param graphData an list of [[mssinceepoch, stime_ms]], for example:
-//     [['1360108800000', 657], ['1360108800000', 989]]
+//     [[1360108800000, 657], [1360108800000, 989]]
 
 function drawGraph(startupTimes) {
     // This can be called before the page is ready, so wrap it in a ready
@@ -86,23 +86,41 @@ function drawGraph(startupTimes) {
         var graphContainer = $('.graph');
         var currentLocale = $('html').attr('lang');
 
+        // the default ticks can be pretty random: align them to day boundaries
+        let min = Math.min.apply(null, [date for ([date, time] of startupTimes)]);
+        let max = Math.max.apply(null, [date for ([date, time] of startupTimes)]);
+        let minoffset = min % ONE_DAY;
+        let ticks = [];
+        let interval = ONE_DAY;
+        if ((max - min) / interval > 20) {
+            interval = ONE_DAY * 2;
+        }
+        for (let tick = min - minoffset + new Date().getTimezoneOffset() * 60 * 1000;
+             tick < max; tick += interval) {
+            ticks.push(tick);
+        }
+
         // We need to localize our month names so first load our localized data,
         // then set the graph options and draw the graph.
         $.getJSON('js/locale/date_format.json', function(data) {
             var options = {
-                colors: ['#50B432'],
+                colors: ['#50b432'],
                 series: {
-                      points: {
-                          show: true,
-                          radius: 5
-                      }
-                  },
-                  xaxis: {
-                      mode: 'time',
-                      monthNames: data[currentLocale].monthNameShort.split(','),
-                      show: true,
-                  }
-              };
+                    points: {
+                        show: true,
+                        radius: 2.5,
+                    },
+                },
+                xaxis: {
+                    min: min - ONE_DAY / 2,
+                    max: max + ONE_DAY / 2,
+                    mode: 'time',
+                    timezone: 'browser',
+                    ticks: ticks,
+                    monthNames: data[currentLocale].monthNameShort.split(','),
+                    show: true,
+                }
+            };
 
             var graph = $.plot(graphContainer, [startupTimes], options);
             // We are drawing a graph so show the Y-label.
