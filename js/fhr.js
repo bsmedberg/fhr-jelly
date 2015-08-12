@@ -3,11 +3,8 @@ $(function() {
     $('.loading').hide();
 
     var navListItems = $('.nav li');
-    var rawTabs = $('#raw_selector').find('li a');
     var navItems = navListItems.find('a');
     var contentContainers = $('.mainContent');
-    var rawContentContainers = $('.rawdata-display');
-    var rawHeadings = $('.raw_heading');
 
     var showContainer = function(anchor) {
         // Get the id of the container to show from the href.
@@ -27,22 +24,6 @@ $(function() {
         $(this).addClass('active');
 
         showContainer($(this));
-    });
-
-    // Handle tab clicks on the raw data view.
-    rawTabs.click(function(event) {
-        event.preventDefault();
-        // Ensure all content containers are hidden.
-        rawContentContainers.hide();
-        rawHeadings.hide();
-
-        // Deactivate all tabs
-        rawTabs.removeClass('active');
-        // Set the clicked anchor to active
-        $(this).addClass('active');
-
-        showContainer($(this), true);
-        $($(this).attr('href') + '_heading').show();
     });
 
     // Show and hide the statistics for viewports less than 768px

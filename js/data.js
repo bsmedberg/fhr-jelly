@@ -4,7 +4,6 @@ var TWO_WEEKS = ONE_DAY * 14;
 var THIRTY_DAYS_IN_SECONDS = 2592000;
 var PAINT_TIME_THRESHOLD = 300000;
 var CONFIG_URL = 'js/config.json?';
-var payload = null;
 var prefs = null;
 
 Promise.prototype.finally = function(fn) {
@@ -19,6 +18,11 @@ Promise.prototype.finally = function(fn) {
         }
     );
 };
+
+let dateFormat = new Intl.DateTimeFormat(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+function displayDate(timestamp) {
+    return dateFormat.format(new Date(timestamp));
+}
 
 // Is this the first load for the document?
 var isFirstLoad = true;
@@ -94,6 +98,10 @@ function populateEnvironment(environment) {
 
 let pendingIDs = new Map();
 function promiseFetchPing(id) {
+    if (pendingIDs.has(id)) {
+        let [promise, resolve, reject] = pendingIDs.get(id);
+        return promise;
+    }
     let evt = new CustomEvent('RemoteHealthReportCommand', {
         detail: {
             command: 'RequestTelemetryPingData',
@@ -101,9 +109,13 @@ function promiseFetchPing(id) {
         }
     });
     document.dispatchEvent(evt);
-    return new Promise((resolve, reject) => {
-        pendingIDs.set(id, [resolve, reject]);
+    let resolver, rejector;
+    let promise = new Promise((resolve, reject) => {
+        resolver = resolve;
+        rejector = reject;
     }).finally(() => { pendingIDs.delete(id); });
+    pendingIDs.set(id, [promise, resolver, rejector]);
+    return promise;
 }
 
 let pendingCurrentSubsession = null;
@@ -115,12 +127,12 @@ function promiseFetchCurrentSubsession() {
 }
 
 function pingReceived(id, data) {
-    let [resolve, reject] = pendingIDs.get(id);
+    let [promise, resolve, reject] = pendingIDs.get(id);
     resolve(data);
 }
 
 function pingError(id, err) {
-    let [resolve, reject] = pendingIDs.get(id);
+    let [promise, resolve, reject] = pendingIDs.get(id);
     reject(err);
 }
 
@@ -212,7 +224,16 @@ function populateThisMonth(pingList) {
         .then(processMainPing)
         .finally(pendingFinished);
 
+    pingList.sort((a, b) => b.timestampCreated - a.timestampCreated);
+    let linkList = document.getElementById('rawdata-list');
     for (let {type, timestampCreated, id} of pingList) {
+        let link = document.createElement('a');
+        link.setAttribute("data-id", id);
+        link.textContent = displayDate(timestampCreated) + ": " + type;
+        let line = document.createElement('li');
+        line.appendChild(link);
+        linkList.appendChild(line);
+
         if (!isPastNDays(timestampCreated, 35)) {
             continue;
         }
@@ -235,6 +256,16 @@ function populateThisMonth(pingList) {
             ).finally(pendingFinished);
         }
     }
+
+    $(document).on('click', '#rawdata-list a', function() {
+        let id = this.getAttribute('data-id');
+        promiseFetchPing(id).then((data) => {
+            document.getElementById('rawdata-data').textContent =
+                JSON.stringify(data, null, 2);
+            $("#rawdata-list > .current").removeClass("current");
+            $(this.parentElement).addClass("current");
+        });
+    });
 }
 
 function init() {
@@ -287,7 +318,6 @@ function receiveMessage(event) {
         break;
     case 'telemetry-ping-list':
         populateThisMonth(event.data.content);
-        document.querySelector('.rawdata-display pre').textContent = JSON.stringify(payload, null, 2);
         break;
     case 'telemetry-ping-data':
         if (event.data.content.pingData !== undefined) {
